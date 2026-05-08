@@ -12,22 +12,16 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 settings = get_settings()
 
 
-async def _verify_google_token(id_token: str) -> dict:
-    """Verify Google ID token and return payload."""
+async def _verify_google_token(access_token: str) -> dict:
+    """Verify Google access token via userinfo endpoint and return profile."""
     async with httpx.AsyncClient(timeout=10) as client:
         r = await client.get(
-            "https://oauth2.googleapis.com/tokeninfo",
-            params={"id_token": id_token},
+            "https://www.googleapis.com/oauth2/v3/userinfo",
+            headers={"Authorization": f"Bearer {access_token}"},
         )
         if r.status_code != 200:
             raise HTTPException(status_code=401, detail="Invalid Google token")
-        payload = r.json()
-
-    # Verify audience matches our client ID (if configured)
-    if settings.google_client_id and payload.get("aud") != settings.google_client_id:
-        raise HTTPException(status_code=401, detail="Token audience mismatch")
-
-    return payload
+        return r.json()
 
 
 @router.post("/google", response_model=TokenResponse, status_code=200)
