@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     app_name: str = "Travel Planning & Experience Engine"
     debug: bool = False
 
-    # Database — Cloud SQL uses unix socket on Cloud Run
+    # Database
     database_url: str = "postgresql+asyncpg://travel:travel@localhost:5432/traveldb"
 
     # Redis
@@ -17,14 +17,19 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7
 
+    # Google OAuth
+    google_client_id: str = ""
+
     # Anthropic
     anthropic_api_key: str = ""
+
+    # Google APIs
+    google_maps_api_key: str = ""
 
     # External APIs
     amadeus_client_id: str = ""
     amadeus_client_secret: str = ""
     openweather_api_key: str = ""
-    google_places_api_key: str = ""
 
     # Cloud Run: Cloud SQL unix socket
     cloud_sql_connection_name: str = ""

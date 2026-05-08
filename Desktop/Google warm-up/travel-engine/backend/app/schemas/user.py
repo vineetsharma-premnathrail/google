@@ -29,6 +29,8 @@ class UserOut(BaseModel):
     id: str
     email: str
     full_name: Optional[str]
+    avatar_url: Optional[str] = None
+    google_id: Optional[str] = None
     preferences: dict
     created_at: datetime
 

@@ -13,6 +13,8 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     full_name: Mapped[str] = mapped_column(String, nullable=True)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    google_id: Mapped[str] = mapped_column(String, nullable=True, unique=True)
+    avatar_url: Mapped[str] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Stored as JSON: { travel_style, pace, interests, dietary, accessibility, avoid, budget_range }
