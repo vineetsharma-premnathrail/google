@@ -8,11 +8,12 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
+  // Fallback keeps GoogleOAuthProvider mounted (required by useGoogleLogin in AuthPage)
+  const googleClientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "placeholder.apps.googleusercontent.com";
   return (
     <html lang="en">
       <body>
-        {/* Skip navigation link for screen readers */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-brand-600 focus:text-white focus:rounded-lg focus:outline-none"

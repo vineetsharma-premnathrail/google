@@ -11,13 +11,16 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "",
 };
 
-// Singleton Firebase app
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Only initialize Firebase if a real API key is provided
+const hasFirebaseConfig = Boolean(firebaseConfig.apiKey && firebaseConfig.appId);
+const app = hasFirebaseConfig
+  ? (getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0])
+  : null;
 
 let analyticsInstance: Analytics | null = null;
 
 export async function getFirebaseAnalytics(): Promise<Analytics | null> {
-  if (typeof window === "undefined") return null;
+  if (typeof window === "undefined" || !app) return null;
   if (analyticsInstance) return analyticsInstance;
   const supported = await isSupported();
   if (!supported) return null;
