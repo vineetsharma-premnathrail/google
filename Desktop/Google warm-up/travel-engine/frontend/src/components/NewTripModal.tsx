@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import { useTripStore } from "@/lib/store";
 import type { Trip } from "@/types";
 import { X, Plus, Trash2 } from "lucide-react";
+import { trackTripCreated, trackItineraryGenerated } from "@/lib/firebase";
 
 interface Props {
   onClose: () => void;
@@ -49,9 +50,12 @@ export default function NewTripModal({ onClose }: Props) {
       };
 
       const trip = await api.trips.create(tripData) as Trip;
+      const days = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / 86400000);
+      await trackTripCreated(destinations[0]?.city ?? "Unknown", days, budget ? parseFloat(budget) : undefined);
 
       // 2. Generate AI itinerary immediately
       const generated = await api.trips.generate({ trip_id: trip.id }) as Trip;
+      await trackItineraryGenerated(generated.id, destinations[0]?.city ?? "Unknown");
 
       setTrips([generated, ...trips]);
       setActiveTrip(generated);
@@ -63,11 +67,16 @@ export default function NewTripModal({ onClose }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="new-trip-title"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    >
       <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-slate-800">
-          <h2 className="text-xl font-bold">Plan a New Trip</h2>
+          <h2 id="new-trip-title" className="text-xl font-bold">Plan a New Trip</h2>
           <button className="btn-ghost p-2" onClick={onClose} disabled={generating}>
             <X className="w-5 h-5" />
           </button>

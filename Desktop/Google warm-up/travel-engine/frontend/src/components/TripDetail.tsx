@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import PreferencesPanel from "./PreferencesPanel";
 import LiveUpdatesTicker from "./LiveUpdatesTicker";
+import { trackMapView, trackChatMessage } from "@/lib/firebase";
 
 // Load map only on client (uses window.google)
 const TripMap = dynamic(() => import("./TripMap"), { ssr: false });
@@ -64,6 +65,7 @@ export default function TripDetail({ trip, onBack }: { trip: Trip; onBack: () =>
     setChatHistory((h) => [...h, { role: "user", text: msg }]);
     setChatLoading(true);
     try {
+      await trackChatMessage(trip.id);
       const updated = await api.trips.chat({ trip_id: trip.id, message: msg }) as Trip;
       updateTrip(updated);
       setChatHistory((h) => [...h, { role: "ai", text: "Done! Your itinerary has been updated." }]);
@@ -189,7 +191,7 @@ export default function TripDetail({ trip, onBack }: { trip: Trip; onBack: () =>
                     <List className="w-4 h-4" /> Itinerary
                   </button>
                   <button
-                    onClick={() => setView("map")}
+                    onClick={() => { setView("map"); trackMapView(trip.id, activeDay); }}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors ${view === "map" ? "bg-brand-600 text-white" : "btn-ghost"}`}
                   >
                     <Map className="w-4 h-4" /> Map

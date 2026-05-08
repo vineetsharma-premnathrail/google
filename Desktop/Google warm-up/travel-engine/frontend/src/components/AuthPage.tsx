@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/store";
-import { Plane, Globe, Zap, Chrome } from "lucide-react";
+import { Plane, Globe, Zap } from "lucide-react";
+import { trackGoogleSignIn } from "@/lib/firebase";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register">("login");
@@ -32,6 +33,7 @@ export default function AuthPage() {
 
         // We send the access token as the id_token for server verification
         const res = await api.auth.googleSignIn(tokenResponse.access_token) as any;
+        await trackGoogleSignIn("google");
         handleAuth(res);
       } catch (err: any) {
         setError(err.message);
@@ -52,6 +54,7 @@ export default function AuthPage() {
           ? { email, password, full_name: name }
           : { email, password };
       const res = await api.auth[mode](payload) as any;
+      await trackGoogleSignIn("email");
       handleAuth(res);
     } catch (err: any) {
       setError(err.message);
