@@ -4,7 +4,23 @@ from .config import get_settings
 
 settings = get_settings()
 
-engine = create_async_engine(settings.database_url, echo=settings.debug)
+
+def _build_db_url() -> str:
+    conn = settings.cloud_sql_connection_name
+    if conn:
+        # asyncpg unix socket: host param points to Cloud SQL socket dir
+        socket_dir = f"/cloudsql/{conn}"
+        db_url = settings.database_url
+        # Strip any existing host/port and rewrite with unix socket query param
+        import re
+        # Extract user:pass from the URL
+        match = re.match(r"postgresql\+asyncpg://([^@]+)@.*", db_url)
+        creds = match.group(1) if match else "traveluser"
+        return f"postgresql+asyncpg://{creds}@/traveldb?host={socket_dir}"
+    return settings.database_url
+
+
+engine = create_async_engine(_build_db_url(), echo=settings.debug)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 
